@@ -13,8 +13,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-use Psr\Log\LoggerInterface;
-
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
 
@@ -58,7 +56,7 @@ class ExceptionHandler extends BaseExceptionHandler
         $this->event     = $container->events;
         $this->container = $container;
 
-        parent::__construct($container->make(LoggerInterface::class));
+        parent::__construct($container);
     }
 
     /**
