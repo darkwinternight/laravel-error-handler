@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Whoops\Run as Whoops;
 use Winternight\LaravelErrorHandler\Classes\DebugDisplay;
 use Winternight\LaravelErrorHandler\Classes\PlainDisplay;
@@ -85,6 +86,8 @@ class ExceptionHandler extends BaseExceptionHandler
             return $this->unauthenticated($request, $exception);
         } elseif ($exception instanceof ValidationException) {
             return $this->convertValidationExceptionToResponse($exception, $request);
+        } elseif ($this->isHttpException($exception) && $this->customErrorHtmlTemplateExists($exception)) {
+            return $this->prepareResponse($request, $exception);
         }
 
         $flattened = FlattenException::create($exception);
@@ -143,5 +146,19 @@ class ExceptionHandler extends BaseExceptionHandler
         }
 
         return redirect()->guest('login');
+    }
+
+    /**
+     * Check if custom html template exists for given exception status code
+     *
+     * @param HttpException $exception
+     *
+     * @return bool
+     */
+    protected function customErrorHtmlTemplateExists(HttpException $exception)
+    {
+        $statusCode = $exception->getStatusCode();
+
+        return view()->exists("errors/$statusCode");
     }
 }
